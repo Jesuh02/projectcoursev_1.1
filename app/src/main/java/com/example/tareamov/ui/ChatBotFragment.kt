@@ -24,6 +24,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 
+
+import com.example.tareamov.network.MicroservicioApi
+import com.example.tareamov.network.MicroservicioPromptResponse
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.HttpException
+import java.net.SocketTimeoutException
+
 class ChatBotFragment : Fragment() {
 
     private lateinit var messagesRecyclerView: RecyclerView
@@ -37,6 +45,15 @@ class ChatBotFragment : Fragment() {
     private lateinit var database: AppDatabase
     private lateinit var aiAnalysisService: AIAnalysisService
     private lateinit var fileAnalysisService: FileAnalysisService
+
+    // Retrofit para el microservicio
+    private val microservicioApi: MicroservicioApi by lazy {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://192.168.1.158:3001/") // Cambia aquí si tu IP cambia
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        retrofit.create(MicroservicioApi::class.java)
+    }
     
     private val sessionId = UUID.randomUUID().toString()
     private var currentFileContext: FileContext? = null
@@ -219,41 +236,64 @@ class ChatBotFragment : Fragment() {
         lifecycleScope.launch {
             // Clear input field
             messageEditText.text.clear()
-            
+
             // Save user message
             val userMessage = ChatMessage(
                 message = messageText,
                 isFromUser = true,
                 sessionId = sessionId
             )
-            
+
             withContext(Dispatchers.IO) {
                 database.chatMessageDao().insertMessage(userMessage)
             }
-            
+
             // Show loading indicator
             loadingProgressBar.visibility = View.VISIBLE
-            
+
             try {
-                // Generate AI response using Ollama
-                val botResponse = withContext(Dispatchers.IO) {
-                    // Usar la función que prueba múltiples modelos
-                    tryMultipleModels(
-                        userMessage = messageText,
-                        fileContext = currentFileContext
-                    )
+                // Generar el prompt con contexto de archivo y tema
+                val promptBuilder = StringBuilder()
+                currentFileContext?.let { ctx ->
+                    promptBuilder.append("[Archivo: ")
+                        .append(ctx.fileName)
+                        .append("]\nContenido:\n")
+                        .append(ctx.fileContent.take(2000)) // Limita para no saturar
+                        .append("\n\n")
                 }
-                
+                promptBuilder.append("[Tema del chat]: ")
+                promptBuilder.append(messageText)
+                val promptFinal = promptBuilder.toString()
+
+                // Llamar al microservicio Node.js
+                val response = withContext(Dispatchers.IO) {
+                    try {
+                        val body = com.example.tareamov.network.MicroservicioPromptRequest(
+                            prompt = promptFinal,
+                            ollamaUrl = "http://192.168.1.158:11435",
+                            model = "granite-code"
+                        )
+                        val res = microservicioApi.procesarPrompt(body).execute()
+                        res.body()?.respuesta_texto ?: "(Sin respuesta del modelo)"
+                    } catch (e: HttpException) {
+                        "Error al conectar con el microservicio: ${e.message}"
+                    } catch (e: SocketTimeoutException) {
+                        "Error de timeout al conectar con el microservicio."
+                    } catch (e: Exception) {
+                        "Error inesperado: ${e.message}"
+                    }
+                }
+
                 val botMessage = ChatMessage(
-                    message = botResponse,
+                    message = response,
                     isFromUser = false,
                     sessionId = sessionId
                 )
-                
+
                 withContext(Dispatchers.IO) {
                     database.chatMessageDao().insertMessage(botMessage)
                 }
-                
+
             } catch (e: Exception) {
                 // Fallback response si hay error
                 val errorMessage = ChatMessage(
@@ -261,7 +301,7 @@ class ChatBotFragment : Fragment() {
                     isFromUser = false,
                     sessionId = sessionId
                 )
-                
+
                 withContext(Dispatchers.IO) {
                     database.chatMessageDao().insertMessage(errorMessage)
                 }

@@ -1,0 +1,16 @@
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.7006971Z","response":"¡","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.7176791Z","response":"H","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.7353606Z","response":"ola","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.7532294Z","response":"!","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.7706648Z","response":" ¿","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.7884616Z","response":"En","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.8057114Z","response":" qu","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.8207544Z","response":"é","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.8359013Z","response":" pued","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.850981Z","response":"o","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.8662574Z","response":" ay","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.8821687Z","response":"ud","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.8974744Z","response":"arte","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.9131031Z","response":"?","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.9284113Z","response":"\n","done":false}
+{"model":"granite-code","created_at":"2025-07-17T22:47:14.9450531Z","response":"","done":true,"done_reason":"stop","context":[9927,44,203,58,14026,203,203,10963,44,203,143,113,58,14026,19,47802,776,2063,1309,30860,97,19862,836,30211,49,203],"total_duration":1986374600,"load_duration":1384682700,"prompt_eval_count":10,"prompt_eval_duration":321000000,"eval_count":17,"eval_duration":279000000}
